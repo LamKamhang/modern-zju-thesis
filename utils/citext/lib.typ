@@ -9,7 +9,7 @@
 #let locales-zh-CN = read("locales-zh-CN.xml")
 
 #let simple-split(bs) = {
-  str.split("\n" + bs, "\n@").map(str.trim).filter(it => it != "").map(it => "@" + it)
+  str.split("\n" + bs, regex("\n\s*@")).map(str.trim).filter(it => it != "").map(it => "@" + it)
   // for each element x, first line must be @<type>{<key>,
   // make a dict with key as key and value as x
 }
@@ -74,7 +74,7 @@
   }
 }
 #let en-US-citeauthor = citeauthor-one-two-more.with(AND: " and ", ETAL: " et al.")
-#let zh-CN-citeauthor = citeauthor-one-two-more.with(AND: "和", ETAL: "等")
+#let zh-CN-citeauthor = citeauthor-one-two-more.with(AND: "和", ETAL: "等人")
 
 #let extciteauthor(
   bib,
@@ -143,16 +143,16 @@
   }
 
   show ref.where(label: <citep>): it => {
-    [#extciteauthor(bib, str(it.target)) #cite(it.target)]
+    [#extciteauthor(bib, str(it.target))#cite(it.target)]
   }
 
   show cite.where(form: "prose"): it => {
-    [#extciteauthor(bib, str(it.key)) #cite(it.key)]
+    [#extciteauthor(bib, str(it.key))#cite(it.key)]
   }
 
   show ref.where(label: <citet>): it => {
     show super: it => it.body
-    [#extciteauthor(bib, str(it.target)) #cite(it.target)]
+    [#extciteauthor(bib, str(it.target))#cite(it.target)]
   }
 
   show ref.where(label: <citef>): it => {
@@ -183,5 +183,66 @@
         })
         .flatten()
     )
+  }
+}
+
+#let mycite(..keys) = {
+  for key in keys.pos() {
+    cite-targets.update(old => {
+      if key not in old {
+        old.push(key)
+      }
+      old
+    })
+  }
+
+  context {
+    let loc = here()
+
+    let ref-ids = keys.pos()
+      .map(key => int(get-ref-id(key, loc)))
+
+    let unique-ids = ()
+    if ref-ids.len() > 0 {
+      let sorted-ids = ref-ids.sorted()
+      unique-ids.push(sorted-ids.at(0))
+      for i in range(1, sorted-ids.len()) {
+        if sorted-ids.at(i) != sorted-ids.at(i - 1) {
+          unique-ids.push(sorted-ids.at(i))
+        }
+      }
+    }
+
+    if unique-ids.len() == 0 {
+      return "[]"
+    }
+
+    let groups = ()
+    let current-group = ()
+
+    current-group.push(unique-ids.at(0))
+
+    for i in range(1, unique-ids.len()) {
+      let current-id = unique-ids.at(i)
+      let last-id = current-group.last()
+
+      if current-id == last-id + 1 {
+        current-group.push(current-id)
+      } else {
+        groups.push(current-group)
+        current-group = (current-id,)
+      }
+    }
+    groups.push(current-group)
+
+    let formatted-groups = groups.map(group => {
+      if group.len() > 2 {
+        str(group.first()) + "-" + str(group.last())
+      } else {
+        group.map(str).join(",")
+      }
+    })
+
+    super("[" + formatted-groups.join(",") + "]")
   }
 }
