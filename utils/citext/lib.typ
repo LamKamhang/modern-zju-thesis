@@ -89,8 +89,15 @@
 }
 
 #let cite-targets = state("cite-targets", ())
+#let cite-session = state("cite-session", 0)
 #let new-citext-session() = {
   cite-targets.update(())
+  context {
+    cite-session.update(cite-session.get() + 1)
+  }
+}
+#let cite-label(key) = {
+  label("citext::" + str(cite-session.get()) + "::" + str(key))
 }
 
 #let get-ref-id(key, loc) = {
@@ -111,7 +118,7 @@
     updatecite(key)
     if gen-id {
       context {
-        super("[" + get-ref-id(key, here()) + "]")
+        link(cite-label(key), super("[" + get-ref-id(key, here()) + "]"))
       }
     } else {
       it
@@ -167,11 +174,11 @@
 
 
 
-#let extbib(bib, row-gutter: 1.2em) = {
+#let extbib(bib, column-gutter: 0.65em, row-gutter: 1.2em) = {
   context {
     grid(
       columns: 2,
-      column-gutter: 0.65em,
+      column-gutter: column-gutter,
       row-gutter: row-gutter,
       ..cite-targets
         .at(here())
@@ -179,14 +186,14 @@
         .map(x => {
           let i = x.at(0) + 1
           let target = x.at(1)
-          ([\[#i\]], extcitefull(bib, str(target)))
+          ([\[#i\]], [#extcitefull(bib, str(target))#cite-label(target)])
         })
         .flatten()
     )
   }
 }
 
-#let mycite(..keys) = {
+#let mulcite(..keys) = {
   for key in keys.pos() {
     cite-targets.update(old => {
       if key not in old {
@@ -199,12 +206,11 @@
   context {
     let loc = here()
 
-    let ref-ids = keys.pos()
-      .map(key => int(get-ref-id(key, loc)))
+    let ref-ids = keys.pos().map(key => (idx: int(get-ref-id(key, loc)), key: key))
 
     let unique-ids = ()
     if ref-ids.len() > 0 {
-      let sorted-ids = ref-ids.sorted()
+      let sorted-ids = ref-ids.sorted(key: item => item.idx)
       unique-ids.push(sorted-ids.at(0))
       for i in range(1, sorted-ids.len()) {
         if sorted-ids.at(i) != sorted-ids.at(i - 1) {
@@ -226,7 +232,7 @@
       let current-id = unique-ids.at(i)
       let last-id = current-group.last()
 
-      if current-id == last-id + 1 {
+      if current-id.idx == last-id.idx + 1 {
         current-group.push(current-id)
       } else {
         groups.push(current-group)
@@ -234,12 +240,13 @@
       }
     }
     groups.push(current-group)
+    let item2ref(item) = link(cite-label(item.key), str(item.idx))
 
     let formatted-groups = groups.map(group => {
       if group.len() > 2 {
-        str(group.first()) + "-" + str(group.last())
+        item2ref(group.first()) + "-" + item2ref(group.last())
       } else {
-        group.map(str).join(",")
+        group.map(item2ref).join(",")
       }
     })
 
