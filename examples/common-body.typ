@@ -1,4 +1,4 @@
-#import "../lib.typ": fonts
+#import "../lib.typ": flex-caption, fonts
 
 #import fonts: *
 
@@ -12,6 +12,7 @@
   caption: [浙江大学 LOGO],
 ) <zju-logo>
 如@tbl:sample 所示，这是一张自动调节列宽的表格。
+
 
 #figure(
   table(
@@ -29,11 +30,15 @@
 
 如@eqt:eq:sample 所示，这是一个公式。
 $
-  A = overbrace((a + b + c) + underbrace(i(d + e + f),"虚数"),"复数")
+  A = overbrace((a + b + c) + underbrace(i(d + e + f), "虚数"), "复数")
 $<eq:sample>
 
 如@lst:code-sample 所示，这是一段代码 @zjuthesis，@floater2005surface，@WANG2022102149，@chCurl。
 
+#figure(
+  image("../assets/zju-emblem.svg", width: 40%),
+  caption: flex-caption(long: [#lorem(100)一个很长的caption11。 @chCurl], short: "长Caption"),
+)<zju-2>
 #figure(
   ```
   #include <stdio.h>
@@ -81,6 +86,7 @@ $<eq:sample>
 
 “是的。”
 == 又一个Section
+
 #lorem(100)
 
 #lorem(120)
@@ -90,7 +96,11 @@ $<eq:sample>
 == BB
 #lorem(10)
 
-= 另一个Chapter<chap:1>
+= 另一个Chapter first<chap:1>
+#figure(
+  image("../assets/zju-emblem.svg", width: 40%),
+  caption: [浙江大学 LOGO],
+) <zju-logo3>
 == 又一个Section<sec:1>
 @chap:1
 @sec:1

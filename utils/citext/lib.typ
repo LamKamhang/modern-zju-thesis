@@ -1,4 +1,4 @@
-#import "@preview/ctxjs:0.3.1"
+#import "@preview/ctxjs:0.3.2"
 #import "@preview/mitex:0.2.4": mi
 
 
