@@ -40,6 +40,7 @@
   department: "某学院",
   major: "某专业",
   degree: "硕士",
+  stage: "",
   field: "某方向",
   supervisor: "李四",
   submit-date: datetime.today(),
@@ -50,6 +51,7 @@
   doc,
   degree: "硕士",
   twoside: false,
+  stage: "",
 ) = {
   // Page geometry
   set page(
@@ -68,7 +70,7 @@
     header-ascent: 4mm,
     footer-descent: 35pt,
     header: header(
-      left: [浙江大学#(degree)学位论文],
+      left: [浙江大学#(degree)学位论文#(stage)],
       right: near-chapter,
     ),
     footer: twoside-numbering-footer,
@@ -142,7 +144,7 @@
     ),
     style: doc => {
       set document(title: info.title.join())
-      let doc = graduate-general-set-style(doc, degree: info.degree, twoside: twoside)
+      let doc = graduate-general-set-style(doc, degree: info.degree, twoside: twoside, stage: info.stage)
 
       show: bib.bibshow
       bib.hiddenbib + doc
