@@ -44,7 +44,7 @@
   field: "某方向",
   supervisor: "李四",
   submit-date: datetime.today(),
-  defense-date: ("二一九三年六月", "September 2193"),
+  defense-date: ("xxxx年x月", "x xxxx"),
 )
 
 #let graduate-general-set-style(
